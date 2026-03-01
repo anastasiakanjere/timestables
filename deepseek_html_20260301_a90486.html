@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Times Tables Practice - Year 7</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2b3a67 0%, #1a2639 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+
+        .difficulty-selector {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .difficulty-selector h2 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .difficulty-btn {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: white;
+            min-width: 120px;
+        }
+
+        .difficulty-btn.gold {
+            background: #f1c40f;
+            color: #2c3e50;
+            box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3);
+        }
+
+        .difficulty-btn.gold:hover {
+            background: #f39c12;
+            transform: scale(1.05);
+        }
+
+        .difficulty-btn.green {
+            background: #2ecc71;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .difficulty-btn.green:hover {
+            background: #27ae60;
+            transform: scale(1.05);
+        }
+
+        .difficulty-btn.purple {
+            background: #9b59b6;
+            box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+        }
+
+        .difficulty-btn.purple:hover {
+            background: #8e44ad;
+            transform: scale(1.05);
+        }
+
+        .difficulty-btn.black {
+            background: #2c3e50;
+            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+        }
+
+        .difficulty-btn.black:hover {
+            background: #34495e;
+            transform: scale(1.05);
+        }
+
+        .difficulty-btn.selected {
+            transform: scale(1.05);
+            border: 3px solid white;
+        }
+
+        .game-area {
+            display: none;
+        }
+
+        .game-area.active {
+            display: block;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .difficulty-badge.gold {
+            background: #f1c40f;
+            color: #2c3e50;
+        }
+
+        .difficulty-badge.green {
+            background: #2ecc71;
+        }
+
+        .difficulty-badge.purple {
+            background: #9b59b6;
+        }
+
+        .difficulty-badge.black {
+            background: #2c3e50;
+        }
+
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .question-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .question-text {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .answer-input-card {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.2em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 10px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .answer-input-card:focus {
+            border-color: #3498db;
+        }
+
+        .question-feedback {
+            font-size: 1em;
+            min-height: 40px;
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .question-feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .question-feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .submit-all-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto 20px;
+            padding: 15px 30px;
+            font-size: 1.3em;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .submit-all-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .submit-all-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .score {
+            color: #27ae60;
+        }
+
+        .mistakes {
+            color: #e74c3c;
+        }
+
+        .perfect-screen {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .perfect-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .perfect-score {
+            font-size: 4em;
+            color: #f1c40f;
+            margin-bottom: 20px;
+            animation: sparkle 1s ease;
+        }
+
+        @keyframes sparkle {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .play-again-btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .play-again-btn:hover {
+            background: #229954;
+            transform: scale(1.05);
+        }
+
+        .question-number {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        /* Modal styles for learning facts */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .fact-to-learn {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .correct-answer {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #2ecc71;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            border: 3px solid #27ae60;
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .ok-btn {
+            padding: 15px 50px;
+            font-size: 1.3em;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .ok-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .facts-counter {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .questions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .difficulty-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .difficulty-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .fact-to-learn {
+                font-size: 2.5em;
+            }
+            
+            .correct-answer {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Times Tables Challenge</h1>
+        <p class="subtitle">Choose your level!</p>
+
+        <!-- Difficulty Selection Screen -->
+        <div id="difficultyScreen" class="difficulty-selector">
+            <h2>Select your colour:</h2>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn gold" data-level="gold">Gold</button>
+                <button class="difficulty-btn green" data-level="green">Green</button>
+                <button class="difficulty-btn purple" data-level="purple">Purple</button>
+                <button class="difficulty-btn black" data-level="black">Black</button>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div id="gameArea" class="game-area">
+            <div id="difficultyBadge" class="difficulty-badge">Gold</div>
+            
+            <div id="questionsContainer" class="questions-grid">
+                <!-- Questions will be dynamically inserted here -->
+            </div>
+
+            <button id="submitAllBtn" class="submit-all-btn">Check All Answers ✓</button>
+
+            <div class="scoreboard">
+                <span>✅ Correct: <span id="correctCount">0</span></span>
+                <span>❌ Mistakes: <span id="mistakeCount">0</span></span>
+            </div>
+        </div>
+
+        <!-- Perfect Score Screen (only shown when 10/10) -->
+        <div id="perfectScreen" class="game-area">
+            <div class="perfect-screen">
+                <h2>🏆 PERFECT SCORE! 🏆</h2>
+                <div class="perfect-score">10/10</div>
+                <p class="encouragement">You're a maths champion!</p>
+                <button class="play-again-btn" id="perfectPlayAgainBtn">Play Again 🎮</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Modal -->
+    <div id="learningModal" class="modal">
+        <div class="modal-content">
+            <div class="facts-counter" id="factCounter"></div>
+            <div class="fact-to-learn" id="factQuestion"></div>
+            <div class="correct-answer" id="factAnswer"></div>
+            <button class="ok-btn" id="nextFactBtn">OK ✓</button>
+        </div>
+    </div>
+
+    <script>
+        class TimesTablesGame {
+            constructor() {
+                this.currentLevel = null;
+                this.questions = [];
+                this.correctAnswers = 0;
+                this.mistakes = 0;
+                this.answersSubmitted = false;
+                this.incorrectQuestions = [];
+                this.currentFactIndex = 0;
+                
+                // Question banks
+                this.goldEasyTables = [1, 2, 5, 10];        // 80% for gold
+                this.goldHardTables = [0, 3, 4, 6, 11];     // 20% for gold
+                this.easyTables = [0, 1, 2, 3, 4, 5, 10];   // 80% for green
+                this.hardTables = [6, 7, 8, 9, 11, 12];     // 80% for purple
+                
+                // Black level special questions
+                this.cubes = [
+                    {question: "0³", answer: 0},
+                    {question: "1³", answer: 1},
+                    {question: "2³", answer: 8},
+                    {question: "3³", answer: 27},
+                    {question: "4³", answer: 64},
+                    {question: "5³", answer: 125},
+                    {question: "6³", answer: 216}
+                ];
+                
+                this.squareRoots = [
+                    {question: "√1", answer: 1},
+                    {question: "√4", answer: 2},
+                    {question: "√9", answer: 3},
+                    {question: "√16", answer: 4},
+                    {question: "√25", answer: 5},
+                    {question: "√36", answer: 6},
+                    {question: "√49", answer: 7},
+                    {question: "√64", answer: 8},
+                    {question: "√81", answer: 9},
+                    {question: "√100", answer: 10},
+                    {question: "√121", answer: 11},
+                    {question: "√144", answer: 12},
+                    {question: "√169", answer: 13},
+                    {question: "√196", answer: 14},
+                    {question: "√225", answer: 15}
+                ];
+                
+                this.doublingHalving = [
+                    {question: "3 × 18", answer: 54},
+                    {question: "6 × 14", answer: 84},
+                    {question: "4 × 16", answer: 64},
+                    {question: "7 × 16", answer: 112},
+                    {question: "8 × 14", answer: 112},
+                    {question: "5 × 18", answer: 90},
+                    {question: "9 × 16", answer: 144},
+                    {question: "12 × 14", answer: 168},
+                    {question: "3 × 22", answer: 66},
+                    {question: "6 × 22", answer: 132}
+                ];
+                
+                // Get DOM elements
+                this.difficultyScreen = document.getElementById('difficultyScreen');
+                this.gameArea = document.getElementById('gameArea');
+                this.perfectScreen = document.getElementById('perfectScreen');
+                this.difficultyBadge = document.getElementById('difficultyBadge');
+                this.questionsContainer = document.getElementById('questionsContainer');
+                this.submitAllBtn = document.getElementById('submitAllBtn');
+                this.learningModal = document.getElementById('learningModal');
+                this.factQuestion = document.getElementById('factQuestion');
+                this.factAnswer = document.getElementById('factAnswer');
+                this.factCounter = document.getElementById('factCounter');
+                this.nextFactBtn = document.getElementById('nextFactBtn');
+                
+                // Bind methods
+                this.initEventListeners();
+            }
+
+            initEventListeners() {
+                // Difficulty buttons
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+                        e.target.classList.add('selected');
+                        this.currentLevel = e.target.dataset.level;
+                        this.startGame();
+                    });
+                });
+
+                // Submit all button
+                this.submitAllBtn.addEventListener('click', () => {
+                    this.checkAllAnswers();
+                });
+
+                // Play again button (from perfect screen)
+                document.getElementById('perfectPlayAgainBtn').addEventListener('click', () => {
+                    this.resetToDifficultySelect();
+                });
+
+                // Next fact button
+                this.nextFactBtn.addEventListener('click', () => {
+                    this.showNextFact();
+                });
+            }
+
+            startGame() {
+                // Generate 10 questions based on difficulty
+                this.generateQuestions();
+                this.correctAnswers = 0;
+                this.mistakes = 0;
+                this.answersSubmitted = false;
+                this.incorrectQuestions = [];
+                
+                // Update UI
+                this.updateDifficultyBadge();
+                this.displayQuestions();
+                this.updateScoreboard();
+                
+                // Enable submit button
+                this.submitAllBtn.disabled = false;
+                this.submitAllBtn.textContent = 'Check All Answers ✓';
+                
+                // Switch screens
+                this.difficultyScreen.style.display = 'none';
+                this.gameArea.classList.add('active');
+                this.perfectScreen.classList.remove('active');
+                
+                // Hide modal if visible
+                this.learningModal.classList.remove('active');
+            }
+
+            updateDifficultyBadge() {
+                let badgeClass = this.currentLevel;
+                let badgeText = this.currentLevel.charAt(0).toUpperCase() + this.currentLevel.slice(1);
+                this.difficultyBadge.textContent = badgeText;
+                this.difficultyBadge.className = 'difficulty-badge ' + badgeClass;
+            }
+
+            generateQuestions() {
+                this.questions = [];
+                
+                for (let i = 0; i < 10; i++) {
+                    if (this.currentLevel === 'gold') {
+                        // Gold: 80% easy (1,2,5,10), 20% harder (0,3,4,6,11)
+                        if (Math.random() < 0.8) {
+                            this.questions.push(this.generateGoldEasyQuestion());
+                        } else {
+                            this.questions.push(this.generateGoldHardQuestion());
+                        }
+                    } else if (this.currentLevel === 'green') {
+                        // Green: 80% easy (0,1,2,3,4,5,10), 20% hard (6,7,8,9,11,12)
+                        if (Math.random() < 0.8) {
+                            this.questions.push(this.generateEasyQuestion());
+                        } else {
+                            this.questions.push(this.generateHardQuestion());
+                        }
+                    } else if (this.currentLevel === 'purple') {
+                        // Purple: 20% easy, 80% hard
+                        if (Math.random() < 0.2) {
+                            this.questions.push(this.generateEasyQuestion());
+                        } else {
+                            this.questions.push(this.generateHardQuestion());
+                        }
+                    } else {
+                        // Black: 50% hard tables (filtered), 50% special questions
+                        if (Math.random() < 0.5) {
+                            this.questions.push(this.generateHardQuestion(true)); // true = black level filter
+                        } else {
+                            const specialType = Math.floor(Math.random() * 3);
+                            if (specialType === 0) {
+                                this.questions.push(this.generateCubeQuestion());
+                            } else if (specialType === 1) {
+                                this.questions.push(this.generateSquareRootQuestion());
+                            } else {
+                                this.questions.push(this.generateDoublingQuestion());
+                            }
+                        }
+                    }
+                }
+                
+                // Shuffle questions
+                this.questions = this.shuffleArray(this.questions);
+            }
+
+            generateGoldEasyQuestion() {
+                const table = this.goldEasyTables[Math.floor(Math.random() * this.goldEasyTables.length)];
+                const multiplier = Math.floor(Math.random() * 12) + 1;
+                return {
+                    id: Math.random(),
+                    num1: table,
+                    num2: multiplier,
+                    question: `${table} × ${multiplier}`,
+                    answer: table * multiplier,
+                    userAnswer: null,
+                    isCorrect: null,
+                    feedback: ''
+                };
+            }
+
+            generateGoldHardQuestion() {
+                const table = this.goldHardTables[Math.floor(Math.random() * this.goldHardTables.length)];
+                const multiplier = Math.floor(Math.random() * 12) + 1;
+                return {
+                    id: Math.random(),
+                    num1: table,
+                    num2: multiplier,
+                    question: `${table} × ${multiplier}`,
+                    answer: table * multiplier,
+                    userAnswer: null,
+                    isCorrect: null,
+                    feedback: ''
+                };
+            }
+
+            generateEasyQuestion() {
+                const table = this.easyTables[Math.floor(Math.random() * this.easyTables.length)];
+                const multiplier = Math.floor(Math.random() * 12) + 1;
+                return {
+                    id: Math.random(),
+                    num1: table,
+                    num2: multiplier,
+                    question: `${table} × ${multiplier}`,
+                    answer: table * multiplier,
+                    userAnswer: null,
+                    isCorrect: null,
+                    feedback: ''
+                };
+            }
+
+            generateHardQuestion(blackLevelFilter = false) {
+                let table, multiplier;
+                
+                if (blackLevelFilter) {
+                    // For black level, exclude tables with 1,2,4,5,10
+                    const allowedTables = [3, 6, 7, 8, 9, 11, 12];
+                    table = allowedTables[Math.floor(Math.random() * allowedTables.length)];
+                    
+                    // Also ensure multiplier isn't 1,2,4,5,10
+                    const allowedMultipliers = [3, 6, 7, 8, 9, 11, 12];
+                    multiplier = allowedMultipliers[Math.floor(Math.random() * allowedMultipliers.length)];
+                } else {
+                    table = this.hardTables[Math.floor(Math.random() * this.hardTables.length)];
+                    multiplier = Math.floor(Math.random() * 12) + 1;
+                }
+                
+                return {
+                    id: Math.random(),
+                    num1: table,
+                    num2: multiplier,
+                    question: `${table} × ${multiplier}`,
+                    answer: table * multiplier,
+                    userAnswer: null,
+                    isCorrect: null,
+                    feedback: ''
+                };
+            }
+
+            generateCubeQuestion() {
+                const cube = this.cubes[Math.floor(Math.random() * this.cubes.length)];
+                return {
+                    id: Math.random(),
+                    question: cube.question,
+                    answer: cube.answer,
+                    userAnswer: null,
+                    isCorrect: null,
+                    feedback: ''
+                };
+            }
+
+            generateSquareRootQuestion() {
+                const root = this.squareRoots[Math.floor(Math.random() * this.squareRoots.length)];
+                return {
+                    id: Math.random(),
+                    question: root.question,
+                    answer: root.answer,
+                    userAnswer: null,
+                    isCorrect: null,
+                    feedback: ''
+                };
+            }
+
+            generateDoublingQuestion() {
+                const double = this.doublingHalving[Math.floor(Math.random() * this.doublingHalving.length)];
+                return {
+                    id: Math.random(),
+                    question: double.question,
+                    answer: double.answer,
+                    userAnswer: null,
+                    isCorrect: null,
+                    feedback: ''
+                };
+            }
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            displayQuestions() {
+                this.questionsContainer.innerHTML = '';
+                
+                this.questions.forEach((q, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'question-card';
+                    card.innerHTML = `
+                        <div class="question-number">Question ${index + 1}</div>
+                        <div class="question-text">${q.question} = ?</div>
+                        <input type="number" class="answer-input-card" id="input-${q.id}" placeholder="Enter answer" min="0">
+                        <div class="question-feedback" id="feedback-${q.id}"></div>
+                    `;
+                    
+                    this.questionsContainer.appendChild(card);
+                    
+                    // Add event listener for enter key
+                    const input = document.getElementById(`input-${q.id}`);
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            this.checkAllAnswers();
+                        }
+                    });
+                });
+            }
+
+            checkAllAnswers() {
+                if (this.answersSubmitted) return;
+                
+                this.correctAnswers = 0;
+                this.mistakes = 0;
+                this.incorrectQuestions = [];
+                
+                this.questions.forEach(q => {
+                    const input = document.getElementById(`input-${q.id}`);
+                    const feedback = document.getElementById(`feedback-${q.id}`);
+                    
+                    if (!input || !feedback) return;
+                    
+                    const userAnswer = parseInt(input.value);
+                    
+                    if (isNaN(userAnswer)) {
+                        feedback.textContent = 'Please enter a number!';
+                        feedback.className = 'question-feedback incorrect';
+                        this.mistakes++;
+                        q.isCorrect = false;
+                        this.incorrectQuestions.push(q);
+                    } else if (userAnswer === q.answer) {
+                        feedback.textContent = '✓ Correct!';
+                        feedback.className = 'question-feedback correct';
+                        this.correctAnswers++;
+                        q.isCorrect = true;
+                    } else {
+                        feedback.textContent = `✗ The answer is ${q.answer}`;
+                        feedback.className = 'question-feedback incorrect';
+                        this.mistakes++;
+                        q.isCorrect = false;
+                        this.incorrectQuestions.push(q);
+                    }
+                });
+                
+                this.answersSubmitted = true;
+                this.updateScoreboard();
+                this.submitAllBtn.disabled = true;
+                this.submitAllBtn.textContent = 'All Checked!';
+                
+                // Decide what to do next based on results
+                setTimeout(() => {
+                    if (this.correctAnswers === 10) {
+                        // Perfect score - show celebration screen
+                        this.showPerfectScore();
+                    } else {
+                        // Has mistakes - go straight to learning facts
+                        this.startReview();
+                    }
+                }, 1500);
+            }
+
+            updateScoreboard() {
+                document.getElementById('correctCount').textContent = this.correctAnswers;
+                document.getElementById('mistakeCount').textContent = this.mistakes;
+            }
+
+            showPerfectScore() {
+                this.gameArea.classList.remove('active');
+                this.perfectScreen.classList.add('active');
+            }
+
+            startReview() {
+                if (this.incorrectQuestions.length === 0) {
+                    this.resetToDifficultySelect();
+                    return;
+                }
+                
+                this.currentFactIndex = 0;
+                this.gameArea.classList.remove('active');
+                this.learningModal.classList.add('active');
+                this.showNextFact();
+            }
+
+            showNextFact() {
+                if (this.currentFactIndex < this.incorrectQuestions.length) {
+                    const fact = this.incorrectQuestions[this.currentFactIndex];
+                    
+                    // Update counter
+                    this.factCounter.textContent = `Learning ${this.currentFactIndex + 1} of ${this.incorrectQuestions.length}`;
+                    
+                    // Show the question and answer
+                    this.factQuestion.textContent = `${fact.question} = ?`;
+                    this.factAnswer.textContent = `${fact.answer}`;  // Just the number, big and green!
+                    
+                    this.currentFactIndex++;
+                } else {
+                    // All facts shown, close modal and go back to level select
+                    this.learningModal.classList.remove('active');
+                    this.resetToDifficultySelect();
+                }
+            }
+
+            resetToDifficultySelect() {
+                this.difficultyScreen.style.display = 'block';
+                this.gameArea.classList.remove('active');
+                this.perfectScreen.classList.remove('active');
+                this.learningModal.classList.remove('active');
+                
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+                this.currentLevel = null;
+            }
+        }
+
+        // Start the game when page loads
+        const game = new TimesTablesGame();
+    </script>
+</body>
+</html>
